@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#onKeyPressed" prefHeight="429.0" prefWidth="629.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.loggeranalyzer.ConfigDialogController">
+   <children>
+      <Label layoutX="70.0" layoutY="37.0" text="Folder Path" />
+      <TextField fx:id="folderPathTF" layoutX="143.0" layoutY="33.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="327.0" />
+      <Label layoutX="70.0" layoutY="74.0" text="Find Text" />
+      <TextField fx:id="findTF" layoutX="143.0" layoutY="70.0" prefHeight="25.0" prefWidth="327.0" />
+      <Label layoutX="82.0" layoutY="114.0" text="Date" />
+      <DatePicker fx:id="datePicker" layoutX="143.0" layoutY="110.0" />
+      <Button fx:id="browseButton" layoutX="486.0" layoutY="33.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="Browse" />
+      <CheckBox fx:id="saveConfig" layoutX="433.0" layoutY="114.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="Save Configuration" />
+      <Button fx:id="searchButton" layoutX="504.0" layoutY="233.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="Search" />
+      <Button fx:id="clearButton" layoutX="7.0" layoutY="318.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="Clear" />
+      <Label layoutX="62.0" layoutY="237.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" text="Results:" />
+      <TextArea fx:id="resultsArea" layoutX="56.0" layoutY="265.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="155.0" prefWidth="501.0" />
+   </children>
+</Pane>
