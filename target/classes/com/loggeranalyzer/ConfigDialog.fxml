@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#onKeyPressed" prefHeight="429.0" prefWidth="629.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.loggeranalyzer.ConfigDialogController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#onKeyPressed" prefHeight="585.0" prefWidth="837.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.loggeranalyzer.ConfigDialogController">
    <children>
       <Label layoutX="70.0" layoutY="37.0" text="Folder Path" />
       <TextField fx:id="folderPathTF" layoutX="143.0" layoutY="33.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="327.0" />
@@ -18,6 +18,17 @@
       <Button fx:id="searchButton" layoutX="504.0" layoutY="233.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="Search" />
       <Button fx:id="clearButton" layoutX="7.0" layoutY="318.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="Clear" />
       <Label layoutX="62.0" layoutY="237.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" text="Results:" />
-      <TextArea fx:id="resultsArea" layoutX="56.0" layoutY="265.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="155.0" prefWidth="501.0" />
+      <TableView fx:id="resultsView" layoutX="57.0" layoutY="262.0" prefHeight="156.0" prefWidth="427.0">
+        <columns>
+            <TableColumn fx:id="occurencesColumn" prefWidth="75.0" text="Occurences" />
+          <TableColumn fx:id="pathColumn" prefWidth="75.0" text="Path" />
+          <TableColumn fx:id="dateColumn" prefWidth="75.0" text="Date" />
+            <TableColumn fx:id="timeColumn" prefWidth="82.0" text="Time" />
+            <TableColumn fx:id="uploadStatColumn" prefWidth="119.0" text="Upload Status" />
+        </columns>
+      </TableView>
+      <ChoiceBox layoutX="57.0" layoutY="185.0" prefHeight="25.0" prefWidth="531.0" />
+      <Button fx:id="uploadButton" layoutX="486.0" layoutY="150.0" mnemonicParsing="false" text="Upload" />
+      <TextField fx:id="uploadPathTF" layoutX="143.0" layoutY="150.0" prefHeight="25.0" prefWidth="327.0" />
    </children>
 </Pane>

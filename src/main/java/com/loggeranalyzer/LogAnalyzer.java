@@ -5,8 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-
-import com.loggeranalyzer.TextAreaMessage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LogAnalyzer 
 {	
@@ -16,45 +16,53 @@ public class LogAnalyzer
 		search(searchParameters);
 	}
 	
-	public static StringBuffer search(SearchParameters searchParameters)
+	public static SearchData search(SearchParameters searchParameters)
 	{	
-		//StringBuffer output = new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		String path = "";
+		String searchedText = "";
+		int totalOccurences = 0;
+		List <SearchResult> searchResults = new ArrayList<SearchResult>();
+				
 		try 
 		{
 			String folderPath = searchParameters.getFolderPath();
 			File logFilesDirectory = new File(folderPath);
 			if (!logFilesDirectory.exists()) 
 			{
-				//output.append("Cannot find path \""+folderPath+"\"\n");
-				TextAreaMessage.getMessage().append("Cannot find path \""+folderPath+"\"\n\n");
-				TextAreaMessage.setTextColor("-fx-text-fill: black");
+				output.append("Cannot find path \""+folderPath+"\"\n");
 				//System.out.println("Cannot find path \""+folderPath+"\"");
+				path = "Cannot find path \""+folderPath+"\"";
 			}
 			else 
-			{
+			{	
 				LocalDate date = searchParameters.getDate();
 				DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
+				String formattedDate = dateFormat.format(date);
 				String findText = searchParameters.getFindText();
 				
-				//output.append("Searching for " + findText + " in " + folderPath + ":\n");
-				TextAreaMessage.setTextColor("-fx-text-fill: black");
-				TextAreaMessage.getMessage().append("Searching for " + findText + " in " + folderPath + ":\n");//.toText().setFill(Color.BLACK);
-				
+				output.append("Searching for " + findText + " in " + folderPath + ":\n");
 				
 				int totalMatches = 0;
 				File[] logDirectories = logFilesDirectory.listFiles();
 				for (File f:logDirectories) 
 				{
-					if (f.isDirectory() && f.getName().length() > 7 && f.getName().substring(0,8).equals(dateFormat.format(date))) 
+					String fileName = f.getName();
+					if (f.isDirectory() && fileName.length() > 7 && fileName.substring(0,8).equals(formattedDate)) 
 					{
 						File NAD_DebugLogFile = new File(f.getAbsolutePath()+"\\NAD_Debug.txt");
-						if (NAD_DebugLogFile.exists() && NAD_DebugLogFile.isFile()) {							
+						if (NAD_DebugLogFile.exists() && NAD_DebugLogFile.isFile()) 
+						{							
 							int matches = getMatchesFromFile(NAD_DebugLogFile, findText);
 							totalMatches += matches;
-							//output.append("Found " + matches + " occurences in " + f.getAbsolutePath()+ "\n");
-							TextAreaMessage.getMessage().append("Found " + matches + " occurences in " + f.getAbsolutePath()+ "\n");
-							TextAreaMessage.setTextColor("-fx-text-fill: black");
-							//System.out.println("Found " + matches + " occurences in " + f.getAbsolutePath());
+							
+							System.out.println("Found " + matches + " occurences in " + f.getAbsolutePath());
+							String logHour = fileName.substring(9, 11);
+							String logMinute = fileName.substring(11,13);
+							String logSecond = fileName.substring(13,15);
+							String logTime = logHour + ":" + logMinute +":" + logSecond;
+							
+							searchResults.add(new SearchResult(matches, f.getAbsolutePath(), date.toString(), logTime));
 						}
 					}
 				}
@@ -63,31 +71,26 @@ public class LogAnalyzer
 				
 				if(totalMatches > 0)
 				{
-					//output.append("Found " + totalMatches + " total matches.\n");	
-					TextAreaMessage.getMessage().append("Found " + totalMatches + " total matches.\n");
-					TextAreaMessage.setTextColor("-fx-text-fill: black");
+					output.append("Found " + totalMatches + " total matches.\n");	
 				}
 				else
 				{
-					//output.append("No matches found.\n");
-					TextAreaMessage.getMessage().append("No matches found.\n");
-					TextAreaMessage.setTextColor("-fx-text-fill: black");
+					output.append("No matches found.\n");
 				}
-				//output.append("\n");
-				TextAreaMessage.getMessage().append("\n");
+				output.append("\n");
+				
+				path = folderPath;
+				searchedText = findText;
+				totalOccurences = totalMatches;
 			}
 		} 
 		catch(SecurityException e) 
 		{
 			e.printStackTrace();
 			
-			//output.append(e.getStackTrace());
-			TextAreaMessage.getMessage().append(e.getStackTrace());
-			TextAreaMessage.setTextColor("-fx-text-fill: red");
+			output.append(e.getStackTrace());
 		}
-		//return output.toString();
-		//return TextAreaMessage.getMessage().toString();
-		return TextAreaMessage.getMessage();
+		return new SearchData(path, searchedText, totalOccurences, searchResults);
 	}
 	
 	private static int getMatchesFromFile(File fileName, String searchedPattern)
@@ -98,7 +101,8 @@ public class LogAnalyzer
 			br = new BufferedReader(new FileReader(fileName));
 			String currentLine = null;
 			while((currentLine = br.readLine())!=null) {
-				if (currentLine.contains(searchedPattern)) {
+				if (currentLine.toLowerCase().contains(searchedPattern.toLowerCase())) 
+				{
 					counter++;
 				}
 			}

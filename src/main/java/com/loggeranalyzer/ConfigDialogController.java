@@ -1,20 +1,26 @@
 package com.loggeranalyzer;
 
 import java.io.File;
-import com.loggeranalyzer.TextAreaMessage;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
-//import org.fxmisc.richtext.StyleClassedTextArea;
+
+import org.apache.commons.io.FileUtils;
 import org.controlsfx.dialog.Dialogs;
 
+import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.DirectoryChooser;
@@ -40,22 +46,43 @@ public class ConfigDialogController implements Initializable {
 	private CheckBox saveConfig;
 
 	@FXML
-	private TextArea resultsArea;
-	//private TextArea resultsArea;
+	private TableView<SearchResult> resultsView;
 
+    @FXML
+    private TableColumn<SearchResult, String> occurencesColumn;
+
+    @FXML
+    private TableColumn<SearchResult, String> timeColumn;
+
+    @FXML
+    private TableColumn<SearchResult, String> pathColumn;
+    
+    @FXML
+    private TableColumn<SearchResult, String> dateColumn;
+    
+    @FXML
+    private TableColumn<SearchResult, Boolean> uploadStatColumn;
+    
 	@FXML
 	private Button clearButton;
+	
+	@FXML
+	private Button uploadButton;
+	
+	@FXML
+	private TextField uploadPathTF;
 
-	private Callback<SearchParameters, StringBuffer> mOnSearch;
+	private Callback<SearchParameters, SearchData> mOnSearch;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		searchButton.setOnAction(event -> onSearch());
-		// datePicker.setOnAction(event -> onSearch());
-		clearButton.setOnAction(event -> resultsArea.clear());
+		clearButton.setOnAction(event -> {/*TODO clear()*/});
 		browseButton.setOnAction(event -> onBrowse());
 		datePicker.setValue(LocalDate.now());
+		uploadButton.setOnAction(event -> onUpload());
 		
+		configureResultsView();
 	}
 
 	@FXML
@@ -65,7 +92,7 @@ public class ConfigDialogController implements Initializable {
 		}
 	}
 
-	public void setOnSearch(Callback<SearchParameters, StringBuffer> onSearch) {
+	public void setOnSearch(Callback<SearchParameters, SearchData> onSearch) {
 		mOnSearch = onSearch;	
 	}
 	
@@ -76,12 +103,12 @@ public class ConfigDialogController implements Initializable {
 			String findText = findTF.getText();
 			if(folderPath == null || folderPath.isEmpty()) 
 			{
-				//resultsArea.appendText("Please provide a valid path!\n");		
+				
 				showErrorPopUp("Please provide a valid path!");
 			} 
 			else if (findText == null || findText.isEmpty()) 
 			{
-				//resultsArea.appendText("Please provide text to search!\n");
+				
 				showErrorPopUp("Please provide text to search!");
 			}
 			else
@@ -90,14 +117,8 @@ public class ConfigDialogController implements Initializable {
 				SearchParameters searchParameters = new SearchParameters(
 						folderPath, findText, date, saveConfig.isSelected());
 
-				//String output = mOnSearch.call(searchParameters);
-				TextAreaMessage.setMessage(mOnSearch.call(searchParameters));
-				//resultsArea.clear();
-				resultsArea.setStyle(TextAreaMessage.getTextColor());
-				//resultsArea.appendText(output).;
-				resultsArea.appendText(TextAreaMessage.getMessage().toString());
-				//TextAreaMessage.setMessage(new StringBuffer()); || below method
-				TextAreaMessage.getMessage().delete(0, TextAreaMessage.getMessage().length());
+				SearchData searchData = mOnSearch.call(searchParameters);
+				resultsView.setItems(FXCollections.observableArrayList(searchData.getSearchResults()));
 			}	
 		}
 	}
@@ -131,8 +152,62 @@ public class ConfigDialogController implements Initializable {
 			datePicker.setValue(searchParameters.getDate());
 		}
 	}
+	
+	private void onUpload()
+	{
+		System.out.println("onUpload()");
+		String uploadPath = uploadPathTF.getText();
+		if (uploadPath.isEmpty() == false)
+		{
+			File uploadDirectory = new File(uploadPath);
+			if (uploadDirectory.exists() &&  uploadDirectory.isDirectory())
+			{
+				uploadSelectedFile(uploadDirectory);
+			}
+			else
+			{
+				showErrorPopUp("Upload path '" + uploadPath + "' doesn't point to a directory");
+				
+			}
+		}
+		else
+		{
+			showErrorPopUp("Upload path is empty. \nPlease insert a valid upload destination!");
+		} 
+	}
+	
+	private void uploadSelectedFile(File uploadDirectory)
+	{
+		SearchResult selectedSearchResult= resultsView.getSelectionModel().getSelectedItem();
+		if (selectedSearchResult != null)
+		{	
+			String path = selectedSearchResult.pathProperty().getValue();
+			String extension = ".rar";
+			File file = new File(path + extension);
+			if (file.exists())
+			{
+				try 
+				{
+					FileUtils.copyFileToDirectory(file,uploadDirectory);
+				} 
+				catch (IOException e) 
+				{
+					showErrorPopUp("Could not copy '" + file.getAbsolutePath() + "' to '" + uploadDirectory.getAbsolutePath() + "'");
+				}
+			}
+		}
+	}
+	
 	private void showErrorPopUp(String message)
 	{
 		Dialogs.create().owner(MainWindow.getStage()).title("Error").message(message).showError();
+	}
+	private void configureResultsView()
+	{
+		occurencesColumn.setCellValueFactory(new PropertyValueFactory("occurences"));
+		pathColumn.setCellValueFactory(new PropertyValueFactory("path"));
+		dateColumn.setCellValueFactory(new PropertyValueFactory("date"));
+		timeColumn.setCellValueFactory(new PropertyValueFactory("time"));
+		uploadStatColumn.setCellValueFactory(new PropertyValueFactory("uploaded"));
 	}
 }
