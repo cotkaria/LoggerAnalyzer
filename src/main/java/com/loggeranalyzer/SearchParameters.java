@@ -11,15 +11,13 @@ public class SearchParameters implements Serializable {
 	private String mFolderPath;
 	private String mFindText;
 	private LocalDate mDate;
-	private boolean mSaveConfig;
 	
-	public SearchParameters(String folderPath, String findText, LocalDate date, boolean saveConfig)
+	
+	public SearchParameters(String folderPath, String findText, LocalDate date)
 	{
 		mFolderPath = folderPath;
 		mFindText = findText;
-		mDate = date;
-		mSaveConfig = saveConfig;
-		
+		mDate = date;	
 	}
 	
 	public String getFolderPath()
@@ -33,10 +31,6 @@ public class SearchParameters implements Serializable {
 	public LocalDate getDate()
 	{
 		return mDate;
-	}
-	public boolean getSaveConfig()
-	{
-		return mSaveConfig;
 	}
 	
 }

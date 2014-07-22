@@ -1,7 +1,6 @@
 package com.loggeranalyzer;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -11,12 +10,14 @@ import org.apache.commons.io.FileUtils;
 import org.controlsfx.dialog.Dialogs;
 
 import javafx.collections.FXCollections;
-import javafx.event.EventHandler;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -38,13 +39,19 @@ public class ConfigDialogController implements Initializable {
 
 	@FXML
 	private Button browseButton;
-
+	
+	@FXML
+	private Button selectUploadDestinationButton;
+	
 	@FXML
 	private DatePicker datePicker;
 
 	@FXML
 	private CheckBox saveConfig;
-
+	
+	@FXML
+	private ChoiceBox<SearchResultData> searchHistoryList;
+	
 	@FXML
 	private TableView<SearchResult> resultsView;
 
@@ -72,19 +79,53 @@ public class ConfigDialogController implements Initializable {
 	@FXML
 	private TextField uploadPathTF;
 
-	private Callback<SearchParameters, SearchData> mOnSearch;
+	private Callback<DialogConfiguration, SearchResultData> mOnSearch;
+	private ObservableList<SearchResultData> mSearchResultDataList;
+	
+    public ConfigDialogController() 
+	{
+		mSearchResultDataList = FXCollections.observableArrayList();
+	}
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		searchButton.setOnAction(event -> onSearch());
-		clearButton.setOnAction(event -> {/*TODO clear()*/});
+		clearButton.setOnAction(event -> mSearchResultDataList.clear());
 		browseButton.setOnAction(event -> onBrowse());
 		datePicker.setValue(LocalDate.now());
 		uploadButton.setOnAction(event -> onUpload());
-		
+		selectUploadDestinationButton.setOnAction(event -> onSelectUploadPath());
+		configureSearchHistoryView();
 		configureResultsView();
 	}
-
+	private void configureSearchHistoryView()
+	{	
+		searchHistoryList.setItems(mSearchResultDataList);
+		searchHistoryList.getSelectionModel().selectedIndexProperty().
+			addListener((observableValue, oldIndex, newIndex) -> 
+					{
+						int newIndexValue = newIndex.intValue();
+						if(newIndexValue >= 0)
+						{
+							resultsView.setItems(mSearchResultDataList.get(newIndexValue).getSearchResults());
+						}
+						else 
+						{
+							resultsView.setItems(null);
+						}
+					});
+	}
+	private void configureResultsView()
+	{
+		resultsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		
+		occurencesColumn.setCellValueFactory(new PropertyValueFactory("occurences"));
+		pathColumn.setCellValueFactory(new PropertyValueFactory("path"));
+		dateColumn.setCellValueFactory(new PropertyValueFactory("date"));
+		timeColumn.setCellValueFactory(new PropertyValueFactory("time"));
+		uploadStatColumn.setCellValueFactory(new PropertyValueFactory("uploaded"));
+	}
+	
 	@FXML
 	private void onKeyPressed(KeyEvent keyEvent) {
 		if (keyEvent.getCode().equals(KeyCode.ENTER)) {
@@ -92,7 +133,7 @@ public class ConfigDialogController implements Initializable {
 		}
 	}
 
-	public void setOnSearch(Callback<SearchParameters, SearchData> onSearch) {
+	public void setOnSearch(Callback<DialogConfiguration, SearchResultData> onSearch) {
 		mOnSearch = onSearch;	
 	}
 	
@@ -114,55 +155,68 @@ public class ConfigDialogController implements Initializable {
 			else
 			{
 				LocalDate date = datePicker.getValue();
-				SearchParameters searchParameters = new SearchParameters(
-						folderPath, findText, date, saveConfig.isSelected());
-
-				SearchData searchData = mOnSearch.call(searchParameters);
-				resultsView.setItems(FXCollections.observableArrayList(searchData.getSearchResults()));
+				SearchParameters searchParameters = new SearchParameters(folderPath, findText, date);
+				DialogConfiguration dialogConfiguration = new DialogConfiguration(searchParameters, uploadPathTF.getText(), 
+						saveConfig.isSelected());
+				mSearchResultDataList.add(mOnSearch.call(dialogConfiguration));
+				searchHistoryList.getSelectionModel().selectLast();
 			}	
 		}
 	}
-	private void onBrowse() {
+	
+	private void onBrowse() 
+	{
+		folderPathTF.setText(selectDirectory(folderPathTF.getText()));
+	}
+	
+	
+	private void onSelectUploadPath()
+	{
+		uploadPathTF.setText(selectDirectory(uploadPathTF.getText()));
+	}
+	
+	private String selectDirectory(String initialPath)
+	{
 		DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle("Open file");
+		directoryChooser.setTitle("Choose directory");
 		
-		String currentFolderPath = folderPathTF.getText();
-		if (currentFolderPath.isEmpty() == false)
+		if (initialPath.isEmpty() == false)
 		{
-			File currentFolder = new File(currentFolderPath);
+			File currentFolder = new File(initialPath);
 			if (currentFolder.exists())
 			{ 
-				
 				directoryChooser.setInitialDirectory(currentFolder);
 			}
 		}
 		
 		File selectedDirectory = directoryChooser.showDialog(MainWindow
 				.getStage());
-		if (selectedDirectory != null) {
-			folderPathTF.setText(selectedDirectory.getAbsolutePath());
+		if (selectedDirectory != null) 
+		{
+			return selectedDirectory.getAbsolutePath();
 		}
+		return initialPath;
 	}
 
-	public void setInitialParameters(SearchParameters searchParameters) {
-		if (searchParameters != null) {
+	public void setInitialParameters(DialogConfiguration dialogConfiguration) {
+		if (dialogConfiguration != null) {
+			SearchParameters searchParameters = dialogConfiguration.getSearchParameters();
 			folderPathTF.setText(searchParameters.getFolderPath());
 			findTF.setText(searchParameters.getFindText());
-			saveConfig.setSelected(searchParameters.getSaveConfig());
+			saveConfig.setSelected(dialogConfiguration.shouldSaveConfiguration());
 			datePicker.setValue(searchParameters.getDate());
 		}
 	}
 	
 	private void onUpload()
-	{
-		System.out.println("onUpload()");
+	{	
 		String uploadPath = uploadPathTF.getText();
 		if (uploadPath.isEmpty() == false)
 		{
 			File uploadDirectory = new File(uploadPath);
 			if (uploadDirectory.exists() &&  uploadDirectory.isDirectory())
 			{
-				uploadSelectedFile(uploadDirectory);
+				uploadSelectedFiles(uploadDirectory);
 			}
 			else
 			{
@@ -176,21 +230,39 @@ public class ConfigDialogController implements Initializable {
 		} 
 	}
 	
-	private void uploadSelectedFile(File uploadDirectory)
+	private void uploadSelectedFiles(File uploadDirectory)
 	{
-		SearchResult selectedSearchResult= resultsView.getSelectionModel().getSelectedItem();
-		if (selectedSearchResult != null)
-		{	
-			String path = selectedSearchResult.pathProperty().getValue();
-			String extension = ".rar";
-			File file = new File(path + extension);
-			if (file.exists())
-			{
-				try 
+		ObservableList<SearchResult> selectedSearchResults = resultsView.getSelectionModel().getSelectedItems();
+		
+		if(selectedSearchResults.isEmpty())
+		{
+			showErrorPopUp("Select an entry from the result view to upload.");
+			return;
+		}
+		
+		for(SearchResult searchResult: selectedSearchResults)
+		{
+			if (searchResult != null)
+			{	
+				boolean uploadSuccess = false;
+				
+				String path = searchResult.pathProperty().getValue();
+				String extension = ".rar";
+				File file = new File(path + extension);
+				if (file.exists())
 				{
-					FileUtils.copyFileToDirectory(file,uploadDirectory);
-				} 
-				catch (IOException e) 
+					try 
+					{
+						FileUtils.copyFileToDirectory(file,uploadDirectory);
+						searchResult.uploadedProperty().set(true);
+						uploadSuccess = true;
+					} 
+					catch (IOException e) 
+					{
+					}
+				}
+				
+				if(uploadSuccess == false)
 				{
 					showErrorPopUp("Could not copy '" + file.getAbsolutePath() + "' to '" + uploadDirectory.getAbsolutePath() + "'");
 				}
@@ -202,12 +274,6 @@ public class ConfigDialogController implements Initializable {
 	{
 		Dialogs.create().owner(MainWindow.getStage()).title("Error").message(message).showError();
 	}
-	private void configureResultsView()
-	{
-		occurencesColumn.setCellValueFactory(new PropertyValueFactory("occurences"));
-		pathColumn.setCellValueFactory(new PropertyValueFactory("path"));
-		dateColumn.setCellValueFactory(new PropertyValueFactory("date"));
-		timeColumn.setCellValueFactory(new PropertyValueFactory("time"));
-		uploadStatColumn.setCellValueFactory(new PropertyValueFactory("uploaded"));
-	}
+	
+	
 }

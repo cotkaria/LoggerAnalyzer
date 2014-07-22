@@ -10,29 +10,20 @@ import java.util.List;
 
 public class LogAnalyzer 
 {	
-	public static void main(String[] args) 
-	{	
-		SearchParameters searchParameters = new SearchParameters("D:\\Logs", "Linux version 3.0.21+", LocalDate.now(), false);
-		search(searchParameters);
-	}
 	
-	public static SearchData search(SearchParameters searchParameters)
+	public static SearchResultData search(SearchParameters searchParameters)
 	{	
-		StringBuffer output = new StringBuffer();
-		String path = "";
-		String searchedText = "";
+		String folderPath = "";
 		int totalOccurences = 0;
 		List <SearchResult> searchResults = new ArrayList<SearchResult>();
 				
 		try 
 		{
-			String folderPath = searchParameters.getFolderPath();
+			folderPath = searchParameters.getFolderPath();
 			File logFilesDirectory = new File(folderPath);
 			if (!logFilesDirectory.exists()) 
 			{
-				output.append("Cannot find path \""+folderPath+"\"\n");
-				//System.out.println("Cannot find path \""+folderPath+"\"");
-				path = "Cannot find path \""+folderPath+"\"";
+				folderPath = "Cannot find path \""+folderPath+"\"";
 			}
 			else 
 			{	
@@ -41,9 +32,6 @@ public class LogAnalyzer
 				String formattedDate = dateFormat.format(date);
 				String findText = searchParameters.getFindText();
 				
-				output.append("Searching for " + findText + " in " + folderPath + ":\n");
-				
-				int totalMatches = 0;
 				File[] logDirectories = logFilesDirectory.listFiles();
 				for (File f:logDirectories) 
 				{
@@ -54,7 +42,7 @@ public class LogAnalyzer
 						if (NAD_DebugLogFile.exists() && NAD_DebugLogFile.isFile()) 
 						{							
 							int matches = getMatchesFromFile(NAD_DebugLogFile, findText);
-							totalMatches += matches;
+							totalOccurences += matches;
 							
 							System.out.println("Found " + matches + " occurences in " + f.getAbsolutePath());
 							String logHour = fileName.substring(9, 11);
@@ -66,31 +54,14 @@ public class LogAnalyzer
 						}
 					}
 				}
-				//System.out.println("Found " + totalMatches + " total matches in " + folderPath);
-				
-				
-				if(totalMatches > 0)
-				{
-					output.append("Found " + totalMatches + " total matches.\n");	
-				}
-				else
-				{
-					output.append("No matches found.\n");
-				}
-				output.append("\n");
-				
-				path = folderPath;
-				searchedText = findText;
-				totalOccurences = totalMatches;
 			}
 		} 
 		catch(SecurityException e) 
 		{
 			e.printStackTrace();
-			
-			output.append(e.getStackTrace());
 		}
-		return new SearchData(path, searchedText, totalOccurences, searchResults);
+		return new SearchResultData(folderPath, searchParameters.getFindText(), 
+									totalOccurences, searchParameters.getDate(), searchResults);
 	}
 	
 	private static int getMatchesFromFile(File fileName, String searchedPattern)

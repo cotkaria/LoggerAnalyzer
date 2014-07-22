@@ -23,14 +23,13 @@ public class SearchResult
 		mTime = new SimpleStringProperty(time);
 		mIsUploaded = new SimpleBooleanProperty(false);
 	}
-	
-	public StringProperty pathProperty ()
-	{
-		return mPath;
-	}
 	public IntegerProperty occurencesProperty ()
 	{
 		return mOccurences;
+	}
+	public StringProperty pathProperty ()
+	{
+		return mPath;
 	}
 	public StringProperty dateProperty ()
 	{

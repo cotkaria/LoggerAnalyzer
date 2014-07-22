@@ -27,9 +27,10 @@
             <TableColumn fx:id="uploadStatColumn" prefWidth="119.0" text="Upload Status" />
         </columns>
       </TableView>
-      <ChoiceBox layoutX="57.0" layoutY="185.0" prefHeight="25.0" prefWidth="531.0" />
+      <ChoiceBox fx:id="searchHistoryList" layoutX="107.0" layoutY="185.0" prefHeight="25.0" prefWidth="531.0" />
       <Button fx:id="uploadButton" layoutX="502.0" layoutY="306.0" mnemonicParsing="false" text="Upload" />
       <TextField fx:id="uploadPathTF" layoutX="143.0" layoutY="150.0" prefHeight="25.0" prefWidth="327.0" />
-      <Button fx:id="selectDestination" layoutX="487.0" layoutY="150.0" mnemonicParsing="false" text="Select Destination" />
+      <Button fx:id="selectUploadDestinationButton" layoutX="487.0" layoutY="150.0" mnemonicParsing="false" text="Select Destination" />
+      <Label layoutX="14.0" layoutY="189.0" text="Destination" />
    </children>
 </Pane>

@@ -44,12 +44,12 @@ public class MainWindow extends Application
 		ConfigDialogController dialogController = (ConfigDialogController)loadScene(CONFIG_DIALOG_PATH);
 		if(dialogController != null)
 		{
-			dialogController.setInitialParameters(loadSavedSearchParameters());
-			dialogController.setOnSearch(searchParams -> 
+			dialogController.setInitialParameters(loadSavedConfigParameters());
+			dialogController.setOnSearch(dialogConfiguration -> 
 			{
-				saveSearchParameters(searchParams);
+				saveConfigParameters(dialogConfiguration);
 				
-				return LogAnalyzer.search(searchParams);
+				return LogAnalyzer.search(dialogConfiguration.getSearchParameters());
 			});
 		}
 		else
@@ -91,9 +91,9 @@ public class MainWindow extends Application
 		return null;
 	}
 	
-	private SearchParameters loadSavedSearchParameters()  
+	private DialogConfiguration loadSavedConfigParameters()  
 	{
-		SearchParameters searchParameters = null;
+		DialogConfiguration dialogConfiguration = null;
 		try 
 		{
 			File savedFile = new File(getSaveFilePath());
@@ -101,7 +101,7 @@ public class MainWindow extends Application
 			{
 				FileInputStream inputStream = new FileInputStream(savedFile);
 				ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-				searchParameters = (SearchParameters)objectInputStream.readObject();
+				dialogConfiguration = (DialogConfiguration)objectInputStream.readObject();//cast to new class, not SearchParam...
 				
 				objectInputStream.close();
 			}
@@ -109,7 +109,7 @@ public class MainWindow extends Application
 		catch (Exception e) 
 		{
 		}
-		return searchParameters;
+		return dialogConfiguration;
 		
 	}
 	private String getSaveFilePath()
@@ -127,15 +127,15 @@ public class MainWindow extends Application
 		
 		return saveFilePath;
 	}
-	private void saveSearchParameters(SearchParameters searchParameters)
+	private void saveConfigParameters(DialogConfiguration dialogConfiguration)
 	{
-		if (searchParameters.getSaveConfig())
+		if (dialogConfiguration.shouldSaveConfiguration())
 		{
 			try 
 			{
 				FileOutputStream fileOutputStream = new FileOutputStream(getSaveFile());
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-				objectOutputStream.writeObject(searchParameters);
+				objectOutputStream.writeObject(dialogConfiguration);//newClass
 				objectOutputStream.close();
 			}
 			catch (IOException e) 
