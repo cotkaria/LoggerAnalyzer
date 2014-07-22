@@ -101,7 +101,7 @@ public class MainWindow extends Application
 			{
 				FileInputStream inputStream = new FileInputStream(savedFile);
 				ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-				dialogConfiguration = (DialogConfiguration)objectInputStream.readObject();//cast to new class, not SearchParam...
+				dialogConfiguration = (DialogConfiguration)objectInputStream.readObject();
 				
 				objectInputStream.close();
 			}
@@ -135,7 +135,7 @@ public class MainWindow extends Application
 			{
 				FileOutputStream fileOutputStream = new FileOutputStream(getSaveFile());
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-				objectOutputStream.writeObject(dialogConfiguration);//newClass
+				objectOutputStream.writeObject(dialogConfiguration);
 				objectOutputStream.close();
 			}
 			catch (IOException e) 

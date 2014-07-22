@@ -142,6 +142,7 @@ public class ConfigDialogController implements Initializable {
 		{
 			String folderPath = folderPathTF.getText();
 			String findText = findTF.getText();
+			String uploadPath = uploadPathTF.getText();
 			if(folderPath == null || folderPath.isEmpty()) 
 			{
 				
@@ -205,6 +206,8 @@ public class ConfigDialogController implements Initializable {
 			findTF.setText(searchParameters.getFindText());
 			saveConfig.setSelected(dialogConfiguration.shouldSaveConfiguration());
 			datePicker.setValue(searchParameters.getDate());
+			uploadPathTF.setText(dialogConfiguration.getUploadPath());
+			
 		}
 	}
 	
