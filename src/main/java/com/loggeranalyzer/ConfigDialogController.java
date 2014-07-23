@@ -262,6 +262,7 @@ public class ConfigDialogController implements Initializable {
 					} 
 					catch (IOException e) 
 					{
+						showErrorPopUp(e.getMessage().toString());
 					}
 				}
 				
