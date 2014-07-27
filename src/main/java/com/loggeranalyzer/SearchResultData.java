@@ -16,6 +16,7 @@ public class SearchResultData
 	{
 		mSearchResultsList = FXCollections.observableArrayList(searchResultsList);
 		mFormattedOuput = "Searched for \"" + searchedText + "\" in \"" + searchRoot + "\" on " + localDate + " -> " + totalOccurences + " occurences.";
+		
 	}
 	
 	public ObservableList<SearchResult> getSearchResults()

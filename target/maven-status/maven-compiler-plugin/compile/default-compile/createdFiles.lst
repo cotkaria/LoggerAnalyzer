@@ -1,0 +1,7 @@
+com\loggeranalyzer\MainWindow.class
+com\loggeranalyzer\DialogConfiguration.class
+com\loggeranalyzer\SearchParameters.class
+com\loggeranalyzer\ConfigDialogController.class
+com\loggeranalyzer\SearchResultData.class
+com\loggeranalyzer\LogAnalyzer.class
+com\loggeranalyzer\SearchResult.class

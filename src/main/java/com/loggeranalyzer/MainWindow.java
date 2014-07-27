@@ -24,6 +24,7 @@ public class MainWindow extends Application
 	private static final String CONFIG_DIALOG_PATH = RESOURCES_PATH + "ConfigDialog.fxml";
 	private static final String SAVED_SEARCH_PARAMS_PATH = "save/SavedSearchParamsPath.cfg";
 	private static Stage mStage;
+	private ConfigDialogController mDialogController;
 	
 	public static void main(String[] args)
 	{
@@ -41,21 +42,31 @@ public class MainWindow extends Application
 		mStage.setTitle("Logs analyzer");
 		mStage.setResizable(false);
 		
-		ConfigDialogController dialogController = (ConfigDialogController)loadScene(CONFIG_DIALOG_PATH);
-		if(dialogController != null)
+		mDialogController = (ConfigDialogController)loadScene(CONFIG_DIALOG_PATH);
+		
+		if(mDialogController != null)
 		{
-			dialogController.setInitialParameters(loadSavedConfigParameters());
-			dialogController.setOnSearch(dialogConfiguration -> 
+			mDialogController.setInitialParameters(loadSavedConfigParameters());
+			mDialogController.setOnSearch(searchParameters -> 
 			{
-				saveConfigParameters(dialogConfiguration);
-				
-				return LogAnalyzer.search(dialogConfiguration.getSearchParameters());
+						
+				return LogAnalyzer.search(searchParameters);
 			});
 		}
 		else
 		{
 			System.out.println("Could not initialize the Configuration Dialog.");
 		}
+	}
+	@Override
+	public void stop()
+	{	
+		if((mDialogController!= null) && mDialogController.shouldSaveConfiguration())
+		{
+			saveConfigParameters(mDialogController.getDialogConfiguration());
+			
+		}
+		
 	}
 	public static Stage getStage()
 	{

@@ -1,0 +1,15 @@
+Tasks:
+-disable if searchHistory is empty: SearchHistory pane & ClearButton --DONE
+-no selection of cursor initially --TBD
+-save config onCloseApp -- DONE
+-Add settings for App: pattern for searched folder
+					   the extension of the file that must be uploaded
+					   pattern of the date and time in the folder name
+					   read the default values for settings from an ini file
+-MultiThreaded Search
+
+Rejected Ideas:
+-initially disable: - UploadButton(Solved using PopUp Error)
+-search should be done only after a parameters change (you'd have to clear to do a search with the same parameters) - Not necessary for it complicates the usage of App
+
+						

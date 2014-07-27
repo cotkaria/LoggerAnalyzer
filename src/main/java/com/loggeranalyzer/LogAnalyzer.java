@@ -21,7 +21,7 @@ public class LogAnalyzer
 		{
 			folderPath = searchParameters.getFolderPath();
 			File logFilesDirectory = new File(folderPath);
-			if (!logFilesDirectory.exists()) 
+			if (!logFilesDirectory.exists()) //should not be necessary to make this validation
 			{
 				folderPath = "Cannot find path \""+folderPath+"\"";
 			}
