@@ -15,7 +15,7 @@ public class SearchResultData
 							LocalDate localDate, List<SearchResult> searchResultsList)
 	{
 		mSearchResultsList = FXCollections.observableArrayList(searchResultsList);
-		mFormattedOuput = "Searched for \"" + searchedText + "\" in \"" + searchRoot + "\" on " + localDate + " -> " + totalOccurences + " occurences.";
+		mFormattedOuput = "Searched for \"" + searchedText + "\" in \"" + searchRoot + "\" on " + localDate + " -> " + totalOccurences + " crashes.";
 		
 	}
 	

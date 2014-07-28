@@ -6,15 +6,11 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
-import javax.imageio.stream.FileImageInputStream;
-
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.dialog.Dialogs;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -128,7 +124,7 @@ public class ConfigDialogController implements Initializable {
 //			}
 //		});
 		
-		configureSearchHistoryView();
+		configureSearchHistoryView();	
 		configureResultsView();
 		onSearchHistoryUpdated(true);
 		
@@ -282,7 +278,7 @@ public class ConfigDialogController implements Initializable {
 			}
 			else
 			{
-				showErrorPopUp("Upload path '" + uploadPath + "' doesn't point to a directory");
+				showErrorPopUp("Upload path '" + uploadPath + "' doesn't point to an existing directory");
 				
 			}
 		}
