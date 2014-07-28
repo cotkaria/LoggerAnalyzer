@@ -13,6 +13,8 @@ import org.controlsfx.dialog.Dialogs;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -116,7 +118,16 @@ public class ConfigDialogController implements Initializable {
 		browseButton.setOnAction(event -> onBrowse());
 		datePicker.setValue(LocalDate.now());
 		uploadButton.setOnAction(event -> onUpload());
-		selectUploadDestinationButton.setOnAction(event -> onSelectUploadPath());
+		selectUploadDestinationButton.setOnAction((/*ActionEvent*/ event) -> onSelectUploadPath());
+//		selectUploadDestinationButton.setOnAction(new EventHandler<ActionEvent>() {
+//									
+//			@Override
+//			public void handle(ActionEvent event) 
+//			{
+//				onSelectUploadPath();
+//			}
+//		});
+		
 		configureSearchHistoryView();
 		configureResultsView();
 		onSearchHistoryUpdated(true);
