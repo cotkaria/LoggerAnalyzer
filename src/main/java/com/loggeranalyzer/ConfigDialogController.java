@@ -112,6 +112,7 @@ public class ConfigDialogController implements Initializable {
 		searchButton.setOnAction(event -> onSearch());
 		clearButton.setOnAction(event -> onClear());
 		browseButton.setOnAction(event -> onBrowse());
+		
 		datePicker.setValue(LocalDate.now());
 		uploadButton.setOnAction(event -> onUpload());
 		selectUploadDestinationButton.setOnAction((/*ActionEvent*/ event) -> onSelectUploadPath());
@@ -127,7 +128,7 @@ public class ConfigDialogController implements Initializable {
 		configureSearchHistoryView();	
 		configureResultsView();
 		onSearchHistoryUpdated(true);
-		
+		findTF.requestFocus();
 	}
 	private void configureSearchHistoryView()
 	{	
@@ -163,9 +164,34 @@ public class ConfigDialogController implements Initializable {
 	}
 	
 	@FXML
-	private void onKeyPressed(KeyEvent keyEvent) {
-		if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-			onSearch();
+	private void onKeyPressed(KeyEvent keyEvent) 
+	{
+		if (keyEvent.getCode().equals(KeyCode.ENTER)) 
+		{
+			if(browseButton.isFocused())
+			{
+				onBrowse();
+			}
+			else if(selectUploadDestinationButton.isFocused())
+			{
+				onSelectUploadPath();
+			}
+			else if(searchButton.isFocused())
+			{
+				onSearch();
+			}
+			else if(uploadButton.isFocused())
+			{
+				onUpload();
+			}
+			else if (clearButton.isFocused())
+			{
+				onClear();
+			}
+			else 
+			{
+				onSearch();
+			}
 		}
 	}
 
