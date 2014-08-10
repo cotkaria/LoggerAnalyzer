@@ -1,5 +1,6 @@
 package com.loggeranalyzer;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -11,6 +12,7 @@ import org.controlsfx.dialog.Dialogs;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -18,6 +20,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -25,13 +28,18 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
 import javafx.util.Callback;
 
 public class ConfigDialogController implements Initializable {
 	@FXML
 	private Pane root;
+	
+	@FXML
+	private MenuBar menuBar;
 	
 	@FXML
 	private Button searchButton;
@@ -100,7 +108,11 @@ public class ConfigDialogController implements Initializable {
 	private TextField uploadPathTF;
 
 	private Callback<SearchParameters, SearchResultData> mOnSearch;
+	private Callback<Void, Void> mOnShowSettings;
+	private Callback<Void, Void> mOnShowAbout;
 	private ObservableList<SearchResultData> mSearchResultDataList;
+	private Window mWindow;
+	private String mFileToUploadExtension;
 	
     public ConfigDialogController() 
 	{
@@ -128,7 +140,8 @@ public class ConfigDialogController implements Initializable {
 		configureSearchHistoryView();	
 		configureResultsView();
 		onSearchHistoryUpdated(true);
-		findTF.requestFocus();
+		menuBar.prefWidthProperty().bind(root.widthProperty());
+		// doesn't seem to work : uploadButton.requestFocus();
 	}
 	private void configureSearchHistoryView()
 	{	
@@ -150,12 +163,43 @@ public class ConfigDialogController implements Initializable {
 	private void configureResultsView()
 	{
 		resultsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		resultsView.setOnMouseClicked(event -> onSearchResultsViewClicked(event));
 		occurencesColumn.setCellValueFactory(new PropertyValueFactory("occurences"));
 		pathColumn.setCellValueFactory(new PropertyValueFactory("path"));
 		dateColumn.setCellValueFactory(new PropertyValueFactory("date"));
 		timeColumn.setCellValueFactory(new PropertyValueFactory("time"));
 		uploadStatColumn.setCellValueFactory(new PropertyValueFactory("uploaded"));
 	}
+	
+	private void onSearchResultsViewClicked(MouseEvent event)
+	{
+		if (event.getClickCount()>1)
+		{
+			System.out.println("onSearchResultsView(): " + event.getClickCount());
+			String folderPath = resultsView.getSelectionModel().getSelectedItem().pathProperty().getValue();
+			openFolderInExplorer(folderPath);
+		}
+	}
+	
+	private void openFolderInExplorer(String folderPath)
+	{
+		File folderToOpen = new File(folderPath);
+		if (folderToOpen.exists())
+		{
+			Desktop desktop = Desktop.getDesktop();
+			try {
+				desktop.open(folderToOpen);
+			} 
+			catch (IOException e)
+			{
+			}
+		}
+		else
+		{
+			showErrorPopUp("Could not open directory from: " + folderPath);
+		}
+	}
+	
 	private void onSearchHistoryUpdated(boolean isEmpty)
 	{
 		searchHistoryList.setDisable(isEmpty);
@@ -194,9 +238,43 @@ public class ConfigDialogController implements Initializable {
 			}
 		}
 	}
-
-	public void setOnSearch(Callback<SearchParameters, SearchResultData> onSearch) {
+	
+	@FXML
+	private void showSettings(ActionEvent event)
+	{
+		if(mOnShowSettings != null)
+		{			
+			mOnShowSettings.call(null);
+		}
+	}
+	
+	@FXML
+	private void showAbout(ActionEvent event)
+	{
+		if(mOnShowAbout != null)
+		{
+			mOnShowAbout.call(null);
+		}
+	}
+	
+	public void setWindowOwner(Window window)
+	{
+		mWindow = window;
+	}
+	
+	public void setOnSearch(Callback<SearchParameters, SearchResultData> onSearch) 
+	{
 		mOnSearch = onSearch;	
+	}
+	
+	public void setOnShowSettings(Callback<Void, Void> onShowSettings) 
+	{
+		mOnShowSettings = onShowSettings;	
+	}
+	
+	public void setOnAbout(Callback<Void, Void> onAbout)
+	{
+		mOnShowAbout = onAbout; 
 	}
 	
 	public boolean shouldSaveConfiguration()
@@ -204,6 +282,15 @@ public class ConfigDialogController implements Initializable {
 		return saveConfig.isSelected();
 	}
 	
+	public void setFileToUploadExtension(String archiveExtension)
+	{
+		mFileToUploadExtension = archiveExtension;
+	}
+	
+	public String getFileToUploadExtension()
+	{
+		return mFileToUploadExtension;
+	}
 	
 	public DialogConfiguration getDialogConfiguration()
 	{
@@ -212,7 +299,7 @@ public class ConfigDialogController implements Initializable {
 		LocalDate date = datePicker.getValue();
 		SearchParameters searchParameters = new SearchParameters(folderPath, findText, date);
 		return new DialogConfiguration(searchParameters, uploadPathTF.getText(), 
-				saveConfig.isSelected());
+				saveConfig.isSelected(), mFileToUploadExtension);
 		
 	}
 	
@@ -271,8 +358,7 @@ public class ConfigDialogController implements Initializable {
 			}
 		}
 		
-		File selectedDirectory = directoryChooser.showDialog(MainWindow
-				.getStage());
+		File selectedDirectory = directoryChooser.showDialog(mWindow);
 		if (selectedDirectory != null) 
 		{
 			return selectedDirectory.getAbsolutePath();
@@ -280,15 +366,17 @@ public class ConfigDialogController implements Initializable {
 		return initialPath;
 	}
 
-	public void setInitialParameters(DialogConfiguration dialogConfiguration) {
-		if (dialogConfiguration != null) {
+	public void setInitialParameters(DialogConfiguration dialogConfiguration) 
+	{
+		if (dialogConfiguration != null) 
+		{
 			SearchParameters searchParameters = dialogConfiguration.getSearchParameters();
 			folderPathTF.setText(searchParameters.getFolderPath());
 			findTF.setText(searchParameters.getFindText());
 			saveConfig.setSelected(dialogConfiguration.shouldSaveConfiguration());
 			datePicker.setValue(searchParameters.getDate());
 			uploadPathTF.setText(dialogConfiguration.getUploadPath());
-			
+			mFileToUploadExtension = dialogConfiguration.getFileToUploadExtension();
 		}
 	}
 	
@@ -305,7 +393,6 @@ public class ConfigDialogController implements Initializable {
 			else
 			{
 				showErrorPopUp("Upload path '" + uploadPath + "' doesn't point to an existing directory");
-				
 			}
 		}
 		else
@@ -330,8 +417,7 @@ public class ConfigDialogController implements Initializable {
 			{	
 								
 				String path = searchResult.pathProperty().getValue();
-				String extension = ".zip";
-				File file = new File(path + extension);
+				File file = new File(path + mFileToUploadExtension);
 				if (file.exists())
 				{
 					try 
@@ -355,7 +441,7 @@ public class ConfigDialogController implements Initializable {
 	
 	private void showErrorPopUp(String message)
 	{
-		Dialogs.create().owner(MainWindow.getStage()).title("Error").message(message).showError();
+		Dialogs.create().owner(mWindow).title("Error").message(message).showError();
 	}
 	
 	

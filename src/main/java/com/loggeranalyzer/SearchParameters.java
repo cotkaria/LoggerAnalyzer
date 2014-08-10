@@ -12,6 +12,12 @@ public class SearchParameters implements Serializable {
 	private String mFindText;
 	private LocalDate mDate;
 	
+	public SearchParameters()
+	{
+		mFolderPath = "";
+		mFindText ="";
+		mDate = LocalDate.now();
+	}
 	
 	public SearchParameters(String folderPath, String findText, LocalDate date)
 	{

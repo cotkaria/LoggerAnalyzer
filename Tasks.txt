@@ -11,5 +11,7 @@ Tasks:
 Rejected Ideas:
 -initially disable: - UploadButton(Solved using PopUp Error)
 -search should be done only after a parameters change (you'd have to clear to do a search with the same parameters) - Not necessary for it complicates the usage of App
-
+- verify file extension setting before uploading
+- open selected file on double click
+-move upload function to Mainwindow class
 						

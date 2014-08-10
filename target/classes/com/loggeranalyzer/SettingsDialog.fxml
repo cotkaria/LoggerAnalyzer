@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="295.0" prefWidth="517.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.loggeranalyzer.SettingsDialogController">
+   <children>
+      <Label layoutX="131.0" layoutY="134.0" text="Extension" />
+      <TextField fx:id="fileToUploadExtensionFieldTF" layoutX="188.0" layoutY="130.0" promptText="uploaded file extension" />
+      <Button layoutX="343.0" layoutY="130.0" mnemonicParsing="false" onAction="#onApplySettings" text="Okay" />
+   </children>
+</Pane>

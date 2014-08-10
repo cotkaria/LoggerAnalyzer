@@ -10,6 +10,8 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
@@ -19,12 +21,29 @@ import javafx.stage.Stage;
 
 public class MainWindow extends Application
 {
+//	class ApplySettingsCallback implements Callback<String, Void>
+//	{
+//		private MainWindow mMainWindow;
+//		public ApplySettingsCallback(MainWindow mainWindow)
+//		{
+//			mMainWindow = mainWindow;
+//		}
+//		
+//		public Void call(String fileExtension)
+//		{
+//			mMainWindow.applySettings(fileExtension);
+//			return null;
+//		}
+//	}
+//	
 	//private static final String RESOURCES_PATH = "../../layouts/";
 	private static final String RESOURCES_PATH = "";
 	private static final String CONFIG_DIALOG_PATH = RESOURCES_PATH + "ConfigDialog.fxml";
+	private static final String SETTINGS_DIALOG_PATH = RESOURCES_PATH + "SettingsDialog.fxml";
+	private static final String ABOUT_DIALOG_PATH = RESOURCES_PATH + "AboutDialog.fxml";
 	private static final String SAVED_SEARCH_PARAMS_PATH = "save/SavedSearchParamsPath.cfg";
 	private static Stage mStage;
-	private ConfigDialogController mDialogController;
+	private ConfigDialogController mConfigDialogController;
 	
 	public static void main(String[] args)
 	{
@@ -42,15 +61,40 @@ public class MainWindow extends Application
 		mStage.setTitle("Logs analyzer");
 		mStage.setResizable(false);
 		
-		mDialogController = (ConfigDialogController)loadScene(CONFIG_DIALOG_PATH);
-		
-		if(mDialogController != null)
+		showConfigDialog();
+	}
+	@Override
+	public void stop()
+	{	
+		if((mConfigDialogController!= null) && mConfigDialogController.shouldSaveConfiguration())
 		{
-			mDialogController.setInitialParameters(loadSavedConfigParameters());
-			mDialogController.setOnSearch(searchParameters -> 
-			{
-						
+			saveConfigParameters(mConfigDialogController.getDialogConfiguration());
+			
+		}
+		
+	}
+	
+	private void showConfigDialog()
+	{
+		mConfigDialogController = (ConfigDialogController)loadScene(CONFIG_DIALOG_PATH, mStage);
+		
+		if(mConfigDialogController != null)
+		{
+			mConfigDialogController.setInitialParameters(loadSavedConfigParameters());
+			mConfigDialogController.setWindowOwner(mStage);
+			mConfigDialogController.setOnSearch(searchParameters -> 
+			{	
 				return LogAnalyzer.search(searchParameters);
+			});
+			mConfigDialogController.setOnShowSettings(noParam ->
+			{
+				showSettingsDialog();
+				return null;
+			});
+			mConfigDialogController.setOnAbout(noParam -> 
+			{
+				showAboutDialog();
+				return null;
 			});
 		}
 		else
@@ -58,22 +102,39 @@ public class MainWindow extends Application
 			System.out.println("Could not initialize the Configuration Dialog.");
 		}
 	}
-	@Override
-	public void stop()
-	{	
-		if((mDialogController!= null) && mDialogController.shouldSaveConfiguration())
-		{
-			saveConfigParameters(mDialogController.getDialogConfiguration());
-			
-		}
-		
-	}
-	public static Stage getStage()
+	
+	private void showSettingsDialog()
 	{
-		return mStage;
+		final Stage settingsStage = new Stage();
+		settingsStage.setTitle("Settings");
+		settingsStage.setResizable(false);
+		SettingsDialogController settingsController = (SettingsDialogController)loadScene(SETTINGS_DIALOG_PATH, settingsStage);
+		if(settingsController != null)
+		{
+			settingsController.setFileToUploadExtension(mConfigDialogController.getFileToUploadExtension());
+			settingsController.setOnApplySettings(fileToUploadExtension -> 
+			{
+				mConfigDialogController.setFileToUploadExtension(fileToUploadExtension);
+				return null;
+			});
+		}
 	}
 	
-	private Object loadScene(String scenePath)
+	private void showAboutDialog()
+	{
+		final Stage aboutStage = new Stage();
+		aboutStage.setTitle("About");
+		aboutStage.setResizable(false);
+		loadScene(ABOUT_DIALOG_PATH, aboutStage);
+		
+		
+	}
+//	private void applySettings(String fileToUploadExtension)
+//	{
+//		mDialogController.setFileToUploadExtension(fileToUploadExtension);
+//	}
+	
+	private Object loadScene(String scenePath, Stage stage)
 	{
 		Parent root=null;
 		FXMLLoader loader;
@@ -89,8 +150,8 @@ public class MainWindow extends Application
 				 root = (Parent)loader.load(inputStream);
 				 
 				 Scene scene = new Scene(root);
-				 mStage.setScene(scene); 
-				 mStage.show();
+				 stage.setScene(scene); 
+				 stage.show();
 				 
 			 	return loader.getController();
 			 }
@@ -115,6 +176,10 @@ public class MainWindow extends Application
 				dialogConfiguration = (DialogConfiguration)objectInputStream.readObject();
 				
 				objectInputStream.close();
+			}
+			else
+			{
+				dialogConfiguration = new DialogConfiguration();
 			}
 		}
 		catch (Exception e) 
