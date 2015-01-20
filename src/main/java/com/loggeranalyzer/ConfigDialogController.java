@@ -107,9 +107,10 @@ public class ConfigDialogController implements Initializable {
 	@FXML
 	private TextField uploadPathTF;
 
-	private Callback<SearchParameters, SearchResultData> mOnSearch;
+	private Callback<SearchParameters, SearchResultData> mOnSearch;//declaring a callback reference
 	private Callback<Void, Void> mOnShowSettings;
 	private Callback<Void, Void> mOnShowAbout;
+	
 	private ObservableList<SearchResultData> mSearchResultDataList;
 	private Window mWindow;
 	private String mFileToUploadExtension;
@@ -124,7 +125,6 @@ public class ConfigDialogController implements Initializable {
 		searchButton.setOnAction(event -> onSearch());
 		clearButton.setOnAction(event -> onClear());
 		browseButton.setOnAction(event -> onBrowse());
-		
 		datePicker.setValue(LocalDate.now());
 		uploadButton.setOnAction(event -> onUpload());
 		selectUploadDestinationButton.setOnAction((/*ActionEvent*/ event) -> onSelectUploadPath());
@@ -262,7 +262,7 @@ public class ConfigDialogController implements Initializable {
 		mWindow = window;
 	}
 	
-	public void setOnSearch(Callback<SearchParameters, SearchResultData> onSearch) 
+	public void setOnSearch(Callback<SearchParameters, SearchResultData> onSearch) //passing a callback reference of a callback object  
 	{
 		mOnSearch = onSearch;	
 	}

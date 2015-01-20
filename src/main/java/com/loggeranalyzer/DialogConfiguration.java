@@ -30,7 +30,6 @@ public class DialogConfiguration implements Serializable
 	{
 		return mSearchParameters;
 	}
-	
 	public String getUploadPath()
 	{
 		return mUploadPath;

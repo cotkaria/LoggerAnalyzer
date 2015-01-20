@@ -12,12 +12,15 @@ import java.net.URISyntaxException;
 
 
 
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 public class MainWindow extends Application
 {
@@ -42,6 +45,7 @@ public class MainWindow extends Application
 	private static final String SETTINGS_DIALOG_PATH = RESOURCES_PATH + "SettingsDialog.fxml";
 	private static final String ABOUT_DIALOG_PATH = RESOURCES_PATH + "AboutDialog.fxml";
 	private static final String SAVED_SEARCH_PARAMS_PATH = "save/SavedSearchParamsPath.cfg";
+	private static final String VERSION = "1.0.0";
 	private static Stage mStage;
 	private ConfigDialogController mConfigDialogController;
 	
@@ -58,7 +62,7 @@ public class MainWindow extends Application
 		System.out.println("start()");
 
 		mStage = stage;
-		mStage.setTitle("Logs analyzer");
+		mStage.setTitle("LogAnalyzer v" + VERSION);
 		mStage.setResizable(false);
 		
 		showConfigDialog();
@@ -69,9 +73,7 @@ public class MainWindow extends Application
 		if((mConfigDialogController!= null) && mConfigDialogController.shouldSaveConfiguration())
 		{
 			saveConfigParameters(mConfigDialogController.getDialogConfiguration());
-			
 		}
-		
 	}
 	
 	private void showConfigDialog()
@@ -82,8 +84,9 @@ public class MainWindow extends Application
 		{
 			mConfigDialogController.setInitialParameters(loadSavedConfigParameters());
 			mConfigDialogController.setWindowOwner(mStage);
+			
 			mConfigDialogController.setOnSearch(searchParameters -> 
-			{	
+			{
 				return LogAnalyzer.search(searchParameters);
 			});
 			mConfigDialogController.setOnShowSettings(noParam ->
